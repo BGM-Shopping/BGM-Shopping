@@ -1,1 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BGM PRODUCTS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            color: #333;
+            display: block;
+            flex-direction: column;
+            min-height: 100vh;
+        }
 
+        header {
+            text-align: center;
+            padding: 0;
+            position: relative; /* Important for positioning the image */
+            overflow: hidden; /* Prevents image overflow */
+            object-position: top;
+        }
+
+            header img {
+                width: 100%; /* Image takes full width of the header */
+                height: auto; /* Height adjusts proportionally to maintain aspect ratio */
+                display: block; /* Prevents small space below the image */
+                object-fit: cover; /* or contain, depending on your needs */
+            }
+
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            text-align: center;
+            margin-top: 5px;
+            gap: 25px;
+            padding: 25px;
+        }
+
+            .categories span {
+                font-size: 16px;
+                font-weight: bold;
+                color: brown;
+                cursor: pointer;
+                padding: 8px;
+                justify-content:normal;
+                background-color: cornsilk;
+                border-radius: 5px;
+                transition: color 0.3s, background-color 0.3s;
+                text-align: center;
+                display: inline-block;
+                width: 100%;
+                max-width: 150px;
+            }
+
+                .categories span:hover {
+                    color: darkred;
+                    background-color: #d4d4d4;
+                }
+
+        .gallery-container {
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            max-height: 400px;
+            padding: 20px;
+            align-items: center;
+            text-align: center;
+            gap: 20px;
+            display: none;
+            justify-content: flex-start;
+            scroll-snap-type: y mandatory;
+        }
+
+            .gallery-container img {
+                width: 300px;
+                border-radius: 20px;
+                cursor: pointer;
+                transition: transform 0.3s;
+                text-align: center;
+                scroll-snap-align: start;
+            }
+
+                .gallery-container img:hover {
+                    transform: scale(1.05);
+                }
+
+        #imageOverlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column; /* For the close button and content */
+        }
+
+        .overlay-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 90%; /* Prevents content from being too wide */
+            max-height: 90%; /* Prevents content from being too tall */
+            overflow: auto; /* Adds scrollbars if content overflows */
+            display: flex; /* Use flexbox for image and description layout */
+            flex-direction: column; /* Stack image and description vertically */
+            align-items: center; /* Center content horizontally */
+        }
+
+        #overlayImage {
+            max-width: 100%; /* Image takes up available width within its container */
+            max-height: 80%; /* Image takes up available height within its container */
+            display: block; /* Prevents small vertical space below image */
+        }
+
+        #overlayDescription {
+            color: black;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .close-buttons {
+            position: page; /* Or relative if you want it in the flow */
+            bottom: 100px; /* Adjust position as needed */
+            left: 100%;
+            transform: translateX(-50%); /* Center the buttons */
+            display: flex;
+            gap: 50px; /* Space between buttons */
+            z-index: 40; /* Ensure they are above other content */
+        }
+
+        .close-buttons button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+            .close-buttons button:hover {
+                background-color: #45a049;
+            }
+
+
+
+       /* footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+            font-size: 16px;
+            font-family: 'Felix Titling';
+            display: block;
+            background-color: darkcyan;
+            color: white;
+            margin-top: auto;
+            padding: 15px;
+            
+        }*/
+
+        #text-container {
+            overflow: hidden;
+            white-space: pre-wrap; /* Important for preserving newlines */
+            word-break: break-word; /* Allow words to break */
+        }
+
+            #text-container span {
+                display: inline-block;
+                opacity: 0;
+                transition: opacity 0.2s ease, transform 0.2s ease;
+                transform: translateY(20px);
+            }
+
+            #text-container.reveal span {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        @media (max-width: 800px) {
+            .overlay-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .overlay p {
+                max-width: none;
+                margin-left: 0;
+                margin-top: 10px;
+                text-align: center;
+            }
+        }
+
+        .menu-icon {
+            position: fixed;
+            top: 123px;
+            left: 10px; /* Adjust position as needed */
+            cursor: pointer;
+            z-index: 1001; /* Ensure it's above other elements */
+            font-size: 24px; /* Size of the icon (adjust as needed) */
+        }
+
+        .menu {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 123px; /* Adjust based on menu icon position */
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 1002; /* Above the menu icon */
+        }
+
+            .menu a {
+                display: block; /* Each link on a new line */
+                color: white;
+                text-decoration: none;
+                padding: 5px;
+            }
+
+                .menu a:hover {
+                    background-color: rgba(255, 255, 255, 0.2); /* Highlight on hover */
+                }
+
+            .menu.show {
+                display: block; /* Show the menu when the class is present */
+            }
+        .close-button-gallery { /* Style for the gallery close button */
+            background-color: rgba(0, 0, 0, 0.5);
+            position:fixed;
+            color: white;
+            right:10px;
+            bottom:130px;
+            padding: 20px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px; /* Space below the gallery */
+            display: block; /* Make it a block element to take full width */
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+
+        .gallery-container {
+            display: none;
+            flex-direction: column; /* Align items vertically */
+            align-items: center; /* Center items horizontally */
+            padding-bottom:0px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1><img src="Images/BGMNew1_enhanced.png" /></h1>
+    </header>
+
+    <div class="categories">
+        <span onclick="showGallery(1,this)">Boomika Sarees</span>
+        <span onclick="showGallery(2,this)">Full work soft silk sarees</span>
+        <span onclick="showGallery(3,this)">Semi Kancheepuram silk sarees</span>
+        <span onclick="showGallery(4,this)">Luxury soft silk sarees</span>
+        <span onclick="showGallery(5,this)">New Soft check silk sarees</span>
+        <span onclick="showGallery(6,this)">Premium & royal soft silk sarees</span>
+        <span onclick="showGallery(7,this)">Premium Double Warp-kanji sarees</span>
+        <span onclick="showGallery(8,this)">Rich Cotton Saree</span>
+        <span onclick="showGallery(9,this)">Soft silk saree- Affordable price</span>
+        <span onclick="showGallery(10,this)">Two Work sarees</span>
+        <span onclick="showGallery(11,this)">Vaira oosi design</span>
+    </div>
+
+    <div class="gallery-container" id="gallery1">
+        <img src="Images/Boomika Sarees/IMG-20250126-WA0212.jpg" onclick="openZoom(this.src, 'Boomika sareeDes')">
+        <img src="Images/Boomika Sarees/IMG-20250126-WA0213.jpg" onclick="openZoom(this.src, 'Boomika sareeDes')">
+        <img src="Images/Boomika Sarees/IMG-20250126-WA0214.jpg" onclick="openZoom(this.src, 'Boomika sareeDes')">
+        <img src="Images/Boomika Sarees/IMG-20250126-WA0215.jpg" onclick="openZoom(this.src, 'Boomika sareeDes')">
+        <img src="Images/Boomika Sarees/IMG-20250126-WA0216.jpg" onclick="openZoom(this.src, 'Boomika sareeDes')">
+        <img src="Images/Boomika Sarees/IMG-20250126-WA0217.jpg" onclick="openZoom(this.src, 'Boomika sareeDes')">
+        <img src="Images/Boomika Sarees/IMG-20250126-WA0218.jpg" onclick="openZoom(this.src, 'Boomika sareeDes')">
+        <img src="Images/Boomika Sarees/IMG-20250126-WA0219.jpg" onclick="openZoom(this.src, 'Boomika sareeDes')">
+        <img src="Images/Boomika Sarees/IMG-20250126-WA0220.jpg" onclick="openZoom(this.src, 'Boomika sareeDes')">
+        <img src="Images/Boomika Sarees/IMG-20250126-WA0221.jpg" onclick="openZoom(this.src, 'Boomika sareeDes')">
+        <img src="Images/Boomika Sarees/IMG-20250126-WA0222.jpg" onclick="openZoom(this.src, 'Boomika sareeDes')">
+        <img src="Images/Boomika Sarees/IMG-20250126-WA0223.jpg" onclick="openZoom(this.src, 'Boomika sareeDes')">
+        <img src="Images/Boomika Sarees/IMG-20250126-WA0224.jpg" onclick="openZoom(this.src, 'Boomika sareeDes')">
+        <img src="Images/Boomika Sarees/IMG-20250126-WA0225.jpg" onclick="openZoom(this.src, 'Boomika sareeDes')">
+    </div>
+
+    <div class="gallery-container" id="gallery2">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0180.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0181.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0182.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0183.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0184.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0185.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0186.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0187.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0188.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0189.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0190.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0191.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0192.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0193.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0194.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0195.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0196.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0197.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0198.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0199.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+        <img src="Images/Full work Soft Silk Sarees/IMG-20250126-WA0200.jpg" onclick="openZoom(this.src, 'Full work soft silk sareesDes')">
+    </div>
+
+    <div class="gallery-container" id="gallery3">
+        <img src="Images/Kancheepuram Sarees/Saree1.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/saree2.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/Saree3.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/Saree4.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/Saree5.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/Saree6.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/Saree7.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/Saree8.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/Saree9.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/Saree10.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/Saree11.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/Saree12.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/Saree13.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/Saree14.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/Saree15.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+        <img src="Images/Kancheepuram Sarees/Saree17.jpg" onclick="openZoom(this.src, 'Semi Kancheepuram silk sareesDes')">
+    </div>
+
+    <div class="gallery-container" id="gallery4">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0010.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0011.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0012.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0013.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0014.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0015.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0016.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0017.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0018.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0019.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0020.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0021.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0022.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0023.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0024.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0025.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0026.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0027.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0028.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0029.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0030.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0031.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0032.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0033.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0034.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0036.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0037.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0038.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0039.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0040.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0041.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0042.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+        <img src="Images/Luxury soft silks/IMG-20250126-WA0043.jpg" onclick="openZoom(this.src, 'Luxury soft silk sareesDes')">
+    </div>
+
+    <div class="gallery-container" id="gallery5">
+        <img src="Images/New  soft check silk sarees/IMG-20250126-WA0201.jpg" onclick="openZoom(this.src, 'New Soft check silk sareesDes')">
+        <img src="Images/New  soft check silk sarees/IMG-20250126-WA0202.jpg" onclick="openZoom(this.src, 'New Soft check silk sareesDes')">
+        <img src="Images/New  soft check silk sarees/IMG-20250126-WA0203.jpg" onclick="openZoom(this.src, 'New Soft check silk sareesDes')">
+        <img src="Images/New  soft check silk sarees/IMG-20250126-WA0204.jpg" onclick="openZoom(this.src, 'New Soft check silk sareesDes')">
+        <img src="Images/New  soft check silk sarees/IMG-20250126-WA0205.jpg" onclick="openZoom(this.src, 'New Soft check silk sareesDes')">
+        <img src="Images/New  soft check silk sarees/IMG-20250126-WA0206.jpg" onclick="openZoom(this.src, 'New Soft check silk sareesDes')">
+        <img src="Images/New  soft check silk sarees/IMG-20250126-WA0207.jpg" onclick="openZoom(this.src, 'New Soft check silk sareesDes')">
+        <img src="Images/New  soft check silk sarees/IMG-20250126-WA0208.jpg" onclick="openZoom(this.src, 'New Soft check silk sareesDes')">
+        <img src="Images/New  soft check silk sarees/IMG-20250126-WA0209.jpg" onclick="openZoom(this.src, 'New Soft check silk sareesDes')">
+        <img src="Images/New  soft check silk sarees/IMG-20250126-WA0210.jpg" onclick="openZoom(this.src, 'New Soft check silk sareesDes')">
+        <img src="Images/New  soft check silk sarees/IMG-20250126-WA0211.jpg" onclick="openZoom(this.src, 'New Soft check silk sareesDes')">
+    </div>
+
+    <div class="gallery-container" id="gallery6">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0124.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0125.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0126.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0127.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0128.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0129.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0130.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0131.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0132.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0133.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0134.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0135.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0136.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0137.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0138.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0139.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0140.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0141.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0142.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0143.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0144.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0145.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0146.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0147.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0148.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+        <img src="Images/Premium & royal soft silk Sarees/IMG-20250126-WA0149.jpg" onclick="openZoom(this.src, 'Premium & royal soft silk sareesDes')">
+    </div>
+
+    <div class="gallery-container" id="gallery7">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0079.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0080.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0081.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0082.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0083.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0084.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0085.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0086.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0087.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0088.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0089.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0090.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0091.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0092.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0093.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0094.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0095.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0096.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0097.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0098.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0099.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0100.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0101.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0102.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0103.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0104.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0105.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0106.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0107.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0108.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0109.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0110.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0111.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0112.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0113.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0114.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0115.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0116.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0117.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0118.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0119.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0120.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0121.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0122.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+        <img src="Images/Premium Double Warp-kanji sarees/IMG-20250126-WA0123.jpg" onclick="openZoom(this.src, 'Premium Double Warp-kanji sareesDes')">
+    </div>
+
+    <div class="gallery-container" id="gallery8">
+        <img src="Images/RIch Cotton Saree/IMG-20250126-WA0172.jpg" onclick="openZoom(this.src, 'Rich Cotton SareeDes')">
+        <img src="Images/RIch Cotton Saree/IMG-20250126-WA0173.jpg" onclick="openZoom(this.src, 'Rich Cotton SareeDes')">
+        <img src="Images/RIch Cotton Saree/IMG-20250126-WA0174.jpg" onclick="openZoom(this.src, 'Rich Cotton SareeDes')">
+        <img src="Images/RIch Cotton Saree/IMG-20250126-WA0175.jpg" onclick="openZoom(this.src, 'Rich Cotton SareeDes')">
+        <img src="Images/RIch Cotton Saree/IMG-20250126-WA0176.jpg" onclick="openZoom(this.src, 'Rich Cotton SareeDes')">
+        <img src="Images/RIch Cotton Saree/IMG-20250126-WA0177.jpg" onclick="openZoom(this.src, 'Rich Cotton SareeDes')">
+        <img src="Images/RIch Cotton Saree/IMG-20250126-WA0178.jpg" onclick="openZoom(this.src, 'Rich Cotton SareeDes')">
+        <img src="Images/RIch Cotton Saree/IMG-20250126-WA0179.jpg" onclick="openZoom(this.src, 'Rich Cotton SareeDes')">
+    </div>
+
+    <div class="gallery-container" id="gallery9">
+        <img src="Images/Soft silk saree- low budget/IMG-20250126-WA0226.jpg" onclick="openZoom(this.src, 'Soft silk saree- Affordable priceDes')">
+        <img src="Images/Soft silk saree- low budget/IMG-20250126-WA0227.jpg" onclick="openZoom(this.src, 'Soft silk saree- Affordable priceDes')">
+        <img src="Images/Soft silk saree- low budget/IMG-20250126-WA0228.jpg" onclick="openZoom(this.src, 'Soft silk saree- Affordable priceDes')">
+        <img src="Images/Soft silk saree- low budget/IMG-20250126-WA0229.jpg" onclick="openZoom(this.src, 'Soft silk saree- Affordable priceDes')">
+        <img src="Images/Soft silk saree- low budget/IMG-20250126-WA0230.jpg" onclick="openZoom(this.src, 'Soft silk saree- Affordable priceDes')">
+        <img src="Images/Soft silk saree- low budget/IMG-20250126-WA0231.jpg" onclick="openZoom(this.src, 'Soft silk saree- Affordable priceDes')">
+        <img src="Images/Soft silk saree- low budget/IMG-20250126-WA0232.jpg" onclick="openZoom(this.src, 'Soft silk saree- Affordable priceDes')">
+        <img src="Images/Soft silk saree- low budget/IMG-20250126-WA0233.jpg" onclick="openZoom(this.src, 'Soft silk saree- Affordable priceDes')">
+        <img src="Images/Soft silk saree- low budget/IMG-20250126-WA0234.jpg" onclick="openZoom(this.src, 'Soft silk saree- Affordable priceDes')">
+        <img src="Images/Soft silk saree- low budget/IMG-20250126-WA0235.jpg" onclick="openZoom(this.src, 'Soft silk saree- Affordable priceDes')">
+        <img src="Images/Soft silk saree- low budget/IMG-20250126-WA0236.jpg" onclick="openZoom(this.src, 'Soft silk saree- Affordable priceDes')">
+        <img src="Images/Soft silk saree- low budget/IMG-20250126-WA0237.jpg" onclick="openZoom(this.src, 'Soft silk saree- Affordable priceDes')">
+        <img src="Images/Soft silk saree- low budget/IMG-20250126-WA0238.jpg" onclick="openZoom(this.src, 'Soft silk saree- Affordable priceDes')">
+        <img src="Images/Soft silk saree- low budget/IMG-20250126-WA0239.jpg" onclick="openZoom(this.src, 'Soft silk saree- Affordable priceDes')">
+    </div>
+
+    <div class="gallery-container" id="gallery10">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0045.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0046.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0047.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0048.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0049.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0050.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0051.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0052.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0053.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0054.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0055.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0056.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0057.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0058.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0059.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0060.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0061.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0062.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0063.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0064.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0065.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0066.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0067.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0068.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0069.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0070.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0071.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0072.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0073.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0074.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0075.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0076.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0077.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+        <img src="Images/Two Work Sarees/IMG-20250126-WA0078.jpg" onclick="openZoom(this.src, 'Two Work sareesDes')">
+    </div>
+
+    <div class="gallery-container" id="gallery11">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0150.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0151.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0152.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0153.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0154.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0155.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0156.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0157.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0158.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0159.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0160.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0161.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0162.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0163.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0164.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0165.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0166.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0167.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0168.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0169.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0170.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+        <img src="Images/Vaira oosi design/IMG-20250126-WA0171.jpg" onclick="openZoom(this.src, 'Vaira oosi designDes')">
+    </div>
+
+    <!-- Zoom Overlay -->
+    <div id="imageOverlay">
+        <span class="close-button" onclick="closeZoom()">&times;</span> <div class="overlay-content">
+            <img id="overlayImage" src="" alt="Zoomed Image">
+            <p id="overlayDescription"></p>
+        </div>
+    </div>
+    <div class="menu-icon" onclick="showHomeScreen()">🏠</div>  <div class="menu" id="myMenu">
+        <!--<a href="#" onclick="showHomeScreen()">🏠</a>-->
+    </div>
+    
+    <!--<footer>
+        <p>&copy; Select Your Sarees and Call or WhatsApp to 9789056621. We will show you a sample product of the similar or same item @your doorstep!</p>
+    </footer>-->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll('.gallery-container').forEach(gallery => {
+                gallery.style.display = 'none';
+            });
+        });
+
+        let currentViewState = "home";
+        let currentGalleryId = null;
+        let historyStack = []; // Array to store navigation history
+        let historyIndex = -1; // Index of current state in historyStack
+        
+        function handleNavigation(state) {
+            currentViewState = state.view;
+            if (state.view === "home") {
+                showHomeScreen();
+            } else if (state.view === "gallery") {
+                showGallery(state.galleryId, document.querySelector(`.categories span:nth-child(${state.categoryIndex + 1})`)); // Pass the span element
+            } else if (state.view === "overlay") {
+                openZoom(state.imageSrc, state.descriptionKey);
+            }
+        }
+
+        function showGallery(id, clickedSpan) {
+            document.querySelectorAll('.gallery-container').forEach(gallery => {
+                gallery.style.display = 'none';
+            });
+
+            document.querySelectorAll('.categories span').forEach(span => {
+                if (span !== clickedSpan) {
+                    span.style.display = 'none';
+                }
+            });
+
+            clickedSpan.style.display = 'inline-block';
+
+            document.querySelectorAll('.categories span').forEach(span => {
+                span.classList.remove('active');
+            });
+            clickedSpan.classList.add('active');
+
+            const selectedGallery = document.getElementById('gallery' + id);
+            if (selectedGallery) {
+                selectedGallery.style.display = 'flex';
+                currentViewState = "gallery";
+                currentGalleryId = id;
+                const categoryIndex = Array.from(document.querySelectorAll('.categories span')).indexOf(clickedSpan);
+                historyStack = historyStack.slice(0, historyIndex + 1); // Clear forward history
+                historyStack.push({ view: "gallery", galleryId: id, categoryIndex: categoryIndex });
+                historyIndex++;
+                const closeButtonGallery = document.createElement('span');
+                closeButtonGallery.textContent = 'Close Gallery';
+                closeButtonGallery.classList.add('close-button-gallery'); // Use a separate CSS class
+                closeButtonGallery.addEventListener('click', closeGallery); // New function to close the gallery
+
+                selectedGallery.appendChild(closeButtonGallery);    
+            }
+        }
+        function closeGallery() {
+            const selectedGallery = document.getElementById('gallery' + currentGalleryId); // Get the current gallery
+            if (selectedGallery) {
+                selectedGallery.style.display = 'none'; // Hide the gallery
+                const closeButtonGallery = selectedGallery.querySelector('.close-button-gallery'); //Find the button
+                if (closeButtonGallery) {
+                    selectedGallery.removeChild(closeButtonGallery); // Remove the button
+                }
+
+                document.querySelectorAll('.categories span').forEach(span => {
+                    span.style.display = 'inline-block';
+                });
+                document.querySelectorAll('.categories span').forEach(span => {
+                    span.classList.remove('active');
+                });
+
+                currentViewState = "home";
+                currentGalleryId = null;
+                historyStack = historyStack.slice(0, historyIndex + 1);
+                historyStack.push({ view: "home" });
+                historyIndex++;
+                window.history.pushState({ view: "home" }, "", "/");
+
+            }
+        }
+
+        function toggleMenu() {
+            const menu = document.getElementById('myMenu');
+            menu.classList.toggle('show');
+        }
+
+        function showHomeScreen() {
+            document.querySelectorAll('.gallery-container').forEach(gallery => {
+                gallery.style.display = 'none';
+            });
+
+            document.querySelectorAll('.categories span').forEach(span => {
+                span.style.display = 'inline-block';
+            });
+
+            const menu = document.getElementById('myMenu');
+            menu.classList.remove('show');
+
+            //currentViewState = "home";
+            //currentGalleryId = null;
+            //historyStack = historyStack.slice(0, historyIndex + 1); // Clear forward history
+            //historyStack.push({ view: "home" });
+            //historyIndex++;
+
+            // Correct URL handling for the home screen:
+            if (window.location.pathname !== "/") {
+                window.history.pushState({ view: "home" }, "", "/");
+            } else if (window.location.hash) { //If already on home page and has a hash
+                window.history.pushState({ view: "home" }, "", "/#home");
+            } else {
+                window.history.replaceState({ view: "home" }, "", "/"); // Use replaceState to avoid extra history entry
+            }
+        }
+
+        const descriptions = {
+            "Boomika sareeDes": `👉 Priced at just ₹500;
+                                                📍Silk based most affordable Sarees;
+                                                📍Introducing a stunning new saree with a monochrome base and a striking contrast border;
+                                                📍Featuring fully pastel colours;
+                                                📍This limited-edition piece boasts a stylish contrast pallu;`,
+            "Full work soft silk sareesDes": `👉 Special Price: Rs 900;
+                                                             📍Full work SOFT SILK  SAREES;
+                                                             📍Fine art silk quality, soft silk material;
+                                                             📍Rich pallu & blouse with contrast;
+                                                             📍Small Zari work motif;
+                                                             📍Copper zari worked, smooth feel;
+                                                             📍Comfortable, lightweight, breathable, durable, versatile;
+                                                             📍Ideal for festivals, weddings, parties, casual drapes beautifully;
+                                                             📍100%  soft silk Sarees;`,
+            "Semi Kancheepuram silk sareesDes": `👉 Priced at just ₹2000;
+                                                             📍Semi Kanchipuram Silk Sarees powerloom  Exclusive Bridal Pattern;
+                                                             📍Pure Silk based Hologram design;
+                                                             📍With Best Complimentary Premium box packing For Saree;`,
+            "Luxury soft silk sareesDes": `👉 SPECIAL PRICE ₹1500;
+                                                             📍LUXURY SOFT SILK;
+                                                             📍Pure Mix soft silk sarees;
+                                                             📍Double warp & luxury silk yarn mixed;
+                                                             📍Rich pallu with contrast blouse;
+                                                             📍All over putta work saree;
+                                                             📍Design border;
+                                                             📍1st quality pure pattu saree collection type;
+                                                             📍NOTE👉🏻 Dry wash only;
+                                                             📍#PURE PATTU SOFT SILK Double tone look;
+                                                             📍MARKET PRICE 8000+;`,
+            "New Soft check silk sareesDes": `👉 Price: Rs 890;
+                                                             📍Art Silk in checked;
+                                                             📍Fully Motif Work;
+                                                             📍Full Body stone;
+                                                             📍High-Quality Materials;
+                                                             📍Soft and Comfortable Fabric Ensures All-Day Comfort;`,
+            "Premium & royal soft silk sareesDes": `👉 Price: ₹900;
+                                                             📍Here is premium and royal soft silk sarees are a perfect blend of elegance and grandeur;.
+                                                             📍Made from premium quality  with dhana and silk concept, these sarees are soft, silky, and feature intricate circle and square work;
+                                                             📍Pairs with contrast  blouse;
+                                                             📍A exclusive boutique collection;`,
+            "Premium Double Warp-kanji sareesDes": `👉 Special Sale :2000 Rs;
+                                                                 📍Premium Double Warp;
+                                                                 📍Semi kanchipuram Sarees;
+                                                                 📍Handloom type made;
+                                                                 📍Soft silk;
+                                                                 📍Two jari work saree;
+                                                                 📍Copper Jari;`,
+            "Rich Cotton SareeDes": `👉 Best Price ever : 900 Rs;
+                                                         📍Rich Cotton Saree;
+                                                         📍Power loom;
+                                                         📍Kotta cotton;
+                                                         📍Rich pallu;
+                                                         📍1St Quality;
+                                                         📍Contrast border;
+                                                         📍Contrast Blouse;`,
+            "Soft silk saree- Affordable priceDes": `👉 Price:  550 Rs;
+                                                             📍Soft Silk Saree;
+                                                             📍Art silk weaving;
+                                                             📍Pure motif;
+                                                             📍Pink copper jari;
+                                                             📍Jacquard Border;
+                                                             📍Watt Butta saree;`,
+            "Two Work sareesDes": `👉 Best Price : 900 Rs;
+                                                 📍Bridal Silk Saree;
+                                                 📍Two work saree;
+                                                 📍Half and half model;
+                                                 📍Two design Two colours in single sareee;
+                                                 📍Art silk weaving;
+                                                 📍Arni Made;
+                                                 📍Fully processed;
+                                                 📍Gold, copper jari;
+                                                 📍Two weave;
+                                                 📍Blouse and contrast pallu;`,
+            "Vaira oosi designDes": `👉 Offer Price 950 Rs;
+                                                 📍Limited Edition Trending Vaira Oosi Design;
+                                                 📍Luxurious soft silk saree;
+                                                 📍Vibrant Motifs;
+                                                 📍Rich pallu;
+                                                 📍1St Quality;
+                                                 📍Fine quality zari;
+                                                 📍Contrast Blouse;
+                                                 📍1/2 Warp Saree;
+                                                 📍Perfect for Wedding Season;`,
+        };
+        const spans = document.querySelectorAll('.categories span');
+        spans.forEach((span, index) => { // Use index for gallery ID
+            const link = document.createElement('a');
+            link.href = '#';
+            link.textContent = span.textContent;
+            link.setAttribute('data-gallery-id', index + 1); // Correct gallery ID assignment
+            link.addEventListener('click', () => {
+                showGallery(link.getAttribute('data-gallery-id'), span);
+                menu.classList.remove('show');
+            });
+        });
+        window.addEventListener('click', function (event) {
+            const menu = document.getElementById('myMenu');
+            const menuIcon = document.querySelector('.menu-icon');
+            if (!menu.contains(event.target) && !menuIcon.contains(event.target)) {
+                menu.classList.remove('show');
+            }
+        });
+        
+
+        //const footer = document.querySelector('footer');
+
+        //function blinkFooter() {
+        //    footer.style.opacity = 0;
+        //    setTimeout(() => {
+        //        footer.style.opacity = 5;
+        //    }, 200);
+        //}
+
+       /* setInterval(blinkFooter, 5000);*/
+
+        function openZoom(src, descriptionKey) {
+            const overlay = document.getElementById('imageOverlay');
+            const overlayImage = document.getElementById('overlayImage');
+            const overlayDescription = document.getElementById('overlayDescription');
+            const closeButton = document.createElement('span');            
+            closeButton.textContent = 'CLOSE';
+            
+            closeButton.style.position = 'fixed';            
+            closeButton.style.bottom = '10px';
+            closeButton.style.left = '50%'; // Center horizontally
+            closeButton.style.transform = 'translateX(-50%)';
+            closeButton.style.backgroundColor = 'rgba(0, 0, 0, 0.5)'; // Semi-transparent background
+            closeButton.style.color = 'white';
+            closeButton.style.padding = '10px 20px';
+            closeButton.style.fontSize = '25px'
+            closeButton.style.width = '100px';
+            closeButton.style.height = '40px';
+            closeButton.style.borderRadius = '5px';
+            closeButton.style.cursor = 'pointer';
+            closeButton.id = 'closeButton';
+            overlay.appendChild(closeButton);
+            if (overlay && overlayImage && overlayDescription) {
+                const description = descriptions[descriptionKey];
+
+                if (description) {
+                    const lines = description.split(";");
+                    const formattedDescription = lines.join("<br>");
+                    overlayImage.src = src;
+                    overlayDescription.innerHTML = formattedDescription;
+                    overlay.style.display = 'flex';
+                    overlayDescription.style.textAlign = 'justify'; 
+                    overlayDescription.style.marginBottom = '40px' // Add margin below the description
+                    closeButton.addEventListener('click', closeZoom);
+
+                } else {
+                    console.error("Description not found for key:", descriptionKey);
+                }
+            } else {
+                console.error("One or more overlay elements not found!");
+            }
+            currentViewState = "overlay";
+            historyStack = historyStack.slice(0, historyIndex + 1); // Clear forward history
+            historyStack.push({ view: "overlay", imageSrc: src, descriptionKey: descriptionKey });
+            historyIndex++;
+            
+        }
+
+        function closeZoom() {
+            const overlay = document.getElementById('imageOverlay');
+            const closeButton = document.getElementById('closeButton'); // Get the close button
+
+            overlay.style.display = 'none';
+            overlay.removeChild(closeButton); // Remove the close button when closing
+
+            currentViewState = "gallery";
+            history.back();
+            historyStack.pop();
+            historyIndex--;         
+        }
+
+
+    </script>
+</body>
+</html>
